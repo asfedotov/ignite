@@ -2057,7 +2057,7 @@ public class TcpCommunicationSpi extends IgniteSpiAdapter
                         .writerFactory(writerFactory)
                         .skipRecoveryPredicate(skipRecoveryPred)
                         .messageQueueSizeListener(queueSizeMonitor)
-                        .balancing(usePairedConnections) // Current balancing logic assumes separate in/out connections.
+                        .balancing(true) // Current balancing logic assumes separate in/out connections.
                         .build();
 
                 boundTcpPort = port;
