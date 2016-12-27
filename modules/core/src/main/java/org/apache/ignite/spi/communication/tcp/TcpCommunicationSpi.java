@@ -3611,20 +3611,20 @@ public class TcpCommunicationSpi extends IgniteSpiAdapter
                         recovery = recoveryDescs.get(new ConnectionKey(node.id(), client.connectionIndex(), -1));
 
                         if (recovery != null && recovery.lastAcknowledged() != recovery.received()) {
-                            RecoveryLastReceivedMessage msg = new RecoveryLastReceivedMessage(recovery.received());
-
-                            if (log.isDebugEnabled())
-                                log.debug("Send recovery acknowledgement on timeout [rmtNode=" + nodeId +
-                                    ", rcvCnt=" + msg.received() + ']');
-
-                            try {
-                                nioSrvr.sendSystem(((GridTcpNioCommunicationClient)client).session(), msg);
-
-                                recovery.lastAcknowledged(msg.received());
-                            }
-                            catch (IgniteCheckedException err) {
-                                U.error(log, "Failed to send message: " + err, err);
-                            }
+//                            RecoveryLastReceivedMessage msg = new RecoveryLastReceivedMessage(recovery.received());
+//
+//                            if (log.isDebugEnabled())
+//                                log.debug("Send recovery acknowledgement on timeout [rmtNode=" + nodeId +
+//                                    ", rcvCnt=" + msg.received() + ']');
+//
+//                            try {
+//                                nioSrvr.sendSystem(((GridTcpNioCommunicationClient)client).session(), msg);
+//
+//                                recovery.lastAcknowledged(msg.received());
+//                            }
+//                            catch (IgniteCheckedException err) {
+//                                U.error(log, "Failed to send message: " + err, err);
+//                            }
 
                             continue;
                         }
@@ -3672,22 +3672,22 @@ public class TcpCommunicationSpi extends IgniteSpiAdapter
          */
         private void sendAckOnTimeout(GridNioRecoveryDescriptor recovery, GridNioSession ses) {
             if (recovery != null && recovery.lastAcknowledged() != recovery.received()) {
-                RecoveryLastReceivedMessage msg = new RecoveryLastReceivedMessage(recovery.received());
-
-                if (log.isDebugEnabled()) {
-                    log.debug("Send recovery acknowledgement on timeout [rmtNode=" + recovery.node().id() +
-                        ", rcvCnt=" + msg.received() +
-                        ", lastAcked=" + recovery.lastAcknowledged() + ']');
-                }
-
-                try {
-                    nioSrvr.sendSystem(ses, msg);
-
-                    recovery.lastAcknowledged(msg.received());
-                }
-                catch (IgniteCheckedException e) {
-                    U.error(log, "Failed to send message: " + e, e);
-                }
+//                RecoveryLastReceivedMessage msg = new RecoveryLastReceivedMessage(recovery.received());
+//
+//                if (log.isDebugEnabled()) {
+//                    log.debug("Send recovery acknowledgement on timeout [rmtNode=" + recovery.node().id() +
+//                        ", rcvCnt=" + msg.received() +
+//                        ", lastAcked=" + recovery.lastAcknowledged() + ']');
+//                }
+//
+//                try {
+//                    nioSrvr.sendSystem(ses, msg);
+//
+//                    recovery.lastAcknowledged(msg.received());
+//                }
+//                catch (IgniteCheckedException e) {
+//                    U.error(log, "Failed to send message: " + e, e);
+//                }
             }
         }
 
