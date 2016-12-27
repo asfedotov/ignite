@@ -175,20 +175,6 @@ public class GridNioRecoveryDescriptor {
      * @return {@code False} if queue limit is exceeded.
      */
     public boolean add(SessionWriteRequest req) {
-        assert req != null;
-
-        if (!req.skipRecovery()) {
-            if (resendCnt == 0) {
-                msgReqs.addLast(req);
-
-                sentCnt++;
-
-                return msgReqs.size() < queueLimit;
-            }
-            else
-                resendCnt--;
-        }
-
         return true;
     }
 
@@ -196,24 +182,6 @@ public class GridNioRecoveryDescriptor {
      * @param rcvCnt Number of messages received by remote node.
      */
     public void ackReceived(long rcvCnt) {
-        if (log.isDebugEnabled())
-            log.debug("Handle acknowledgment [acked=" + acked + ", rcvCnt=" + rcvCnt +
-                ", msgReqs=" + msgReqs.size() + ']');
-
-        while (acked < rcvCnt) {
-            SessionWriteRequest req = msgReqs.pollFirst();
-
-            assert req != null : "Missed message [rcvCnt=" + rcvCnt +
-                ", acked=" + acked +
-                ", desc=" + this + ']';
-
-            if (req.ackClosure() != null)
-                req.ackClosure().apply(null);
-
-            req.onAckReceived();
-
-            acked++;
-        }
     }
 
     /**

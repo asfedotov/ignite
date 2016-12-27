@@ -1099,12 +1099,6 @@ public class GridNioServer<T> {
                     readBuf.compact();
                 else
                     readBuf.clear();
-
-                if (ses.hasSystemMessage() && !ses.procWrite.get()) {
-                    ses.procWrite.set(true);
-
-                    registerWrite(ses);
-                }
             }
             catch (IgniteCheckedException e) {
                 close(ses, e);
@@ -1340,16 +1334,6 @@ public class GridNioServer<T> {
          * @return System message request.
          */
         private SessionWriteRequest systemMessage(GridSelectorNioSessionImpl ses) {
-            if (ses.hasSystemMessage()) {
-                Object msg = ses.systemMessage();
-
-                SessionWriteRequest req = new WriteRequestSystemImpl(ses, msg);
-
-                assert !ses.hasSystemMessage();
-
-                return req;
-            }
-
             return null;
         }
 

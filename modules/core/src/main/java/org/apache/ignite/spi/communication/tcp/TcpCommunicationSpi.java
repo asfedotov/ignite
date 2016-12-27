@@ -979,7 +979,7 @@ public class TcpCommunicationSpi extends IgniteSpiAdapter
     private IpcSharedMemoryServerEndpoint shmemSrv;
 
     /** */
-    private boolean usePairedConnections = true;
+    private boolean usePairedConnections = false;
 
     /** */
     private int connectionsPerNode = DFLT_CONN_PER_NODE;
