@@ -2057,7 +2057,7 @@ public class TcpCommunicationSpi extends IgniteSpiAdapter
                         .writerFactory(writerFactory)
                         .skipRecoveryPredicate(skipRecoveryPred)
                         .messageQueueSizeListener(queueSizeMonitor)
-                        .balancing(true) // Current balancing logic assumes separate in/out connections.
+                        .balancing(usePairedConnections ? GridNioServer.Balancer.SIZE1 : GridNioServer.Balancer.SIZE2)
                         .build();
 
                 boundTcpPort = port;
@@ -2066,7 +2066,7 @@ public class TcpCommunicationSpi extends IgniteSpiAdapter
                 if (log.isInfoEnabled())
                     log.info("Successfully bound communication NIO server to TCP port " +
                         "[port=" + boundTcpPort + ", locHost=" + locHost + ", selectorsCnt=" + selectorsCnt +
-                        ", selectorSpins=" + srvr.selectorSpins() + ']');
+                        ", selectorSpins=" + srvr.selectorSpins() + ", pairedConnections=" + usePairedConnections + ']');
 
                 srvr.idleTimeout(idleConnTimeout);
 

@@ -275,7 +275,7 @@ public class GridNioServer<T> {
         GridNioMessageWriterFactory writerFactory,
         IgnitePredicate<Message> skipRecoveryPred,
         IgniteBiInClosure<GridNioSession, Integer> msgQueueLsnr,
-        boolean balancing,
+        Balancer balancing,
         GridNioFilter... filters
     ) throws IgniteCheckedException {
         if (port != -1)
@@ -359,10 +359,25 @@ public class GridNioServer<T> {
 
         IgniteRunnable balancer0 = null;
 
-        if (balancing && balancePeriod > 0) {
+        if (balancing != null && balancePeriod > 0) {
             boolean rndBalance = IgniteSystemProperties.getBoolean(IGNITE_IO_BALANCE_RANDOM_BALANCE, false);
 
-            balancer0 = rndBalance ? new RandomBalancer() : new SizeBasedBalancer2(balancePeriod);
+            if (rndBalance)
+                balancer0 = new RandomBalancer();
+            else {
+                switch (balancing) {
+                    case SIZE1:
+                        balancer0 = new SizeBasedBalancer(balancePeriod);
+                        break;
+
+                    case SIZE2:
+                        balancer0 = new SizeBasedBalancer2(balancePeriod);
+                        break;
+
+                    default:
+                        throw new IllegalArgumentException("Balancer: " + balancing);
+                }
+            }
 
             log.info("Balancer: " + balancer0.getClass().getSimpleName());
         }
@@ -3049,6 +3064,11 @@ public class GridNioServer<T> {
         }
     }
 
+    public static enum Balancer {
+        SIZE1,
+        SIZE2
+    }
+
     /**
      * Constructs a new instance of {@link GridNioServer}.
      */
@@ -3127,7 +3147,7 @@ public class GridNioServer<T> {
         private long selectorSpins;
 
         /** NIO sessions balancing flag. */
-        private boolean balancing;
+        private Balancer balancing;
 
         /**
          * Finishes building the instance.
@@ -3174,7 +3194,7 @@ public class GridNioServer<T> {
          * @param balancing NIO sessions balancing flag.
          * @return This for chaining.
          */
-        public Builder<T> balancing(boolean balancing) {
+        public Builder<T> balancing(Balancer balancing) {
             this.balancing = balancing;
 
             return this;
