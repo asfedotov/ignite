@@ -418,7 +418,7 @@ class GridSelectorNioSessionImpl extends GridNioSessionImpl {
 
     /** {@inheritDoc} */
     @Override public void systemMessage(Object sysMsg) {
-        this.sysMsg = sysMsg;
+        //this.sysMsg = sysMsg;
     }
 
     /**

@@ -654,9 +654,9 @@ public class TcpCommunicationSpi extends IgniteSpiAdapter
                                         ", rcvCnt=" + rcvCnt + ']');
                                 }
 
-                                ses.systemMessage(new RecoveryLastReceivedMessage(rcvCnt));
+                                //ses.systemMessage(new RecoveryLastReceivedMessage(rcvCnt));
 
-                                recovery.lastAcknowledged(rcvCnt);
+                                //recovery.lastAcknowledged(rcvCnt);
                             }
                         }
                     }
