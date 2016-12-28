@@ -2058,6 +2058,7 @@ public class TcpCommunicationSpi extends IgniteSpiAdapter
                         .skipRecoveryPredicate(skipRecoveryPred)
                         .messageQueueSizeListener(queueSizeMonitor)
                         .balancing(usePairedConnections ? GridNioServer.Balancer.SIZE1 : GridNioServer.Balancer.SIZE2)
+                        .readWriteSelectorsAssign(usePairedConnections)
                         .build();
 
                 boundTcpPort = port;

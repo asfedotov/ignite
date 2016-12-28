@@ -227,6 +227,9 @@ public class GridNioServer<T> {
     /** */
     private final IgniteRunnable balancer;
 
+    /** */
+    private final boolean readWriteSelectorsAssign;
+
     /**
      * @param addr Address.
      * @param port Port.
@@ -276,6 +279,7 @@ public class GridNioServer<T> {
         IgnitePredicate<Message> skipRecoveryPred,
         IgniteBiInClosure<GridNioSession, Integer> msgQueueLsnr,
         Balancer balancing,
+        boolean readWriteSelectorsAssign,
         GridNioFilter... filters
     ) throws IgniteCheckedException {
         if (port != -1)
@@ -300,6 +304,7 @@ public class GridNioServer<T> {
         this.sndQueueLimit = sndQueueLimit;
         this.msgQueueLsnr = msgQueueLsnr;
         this.selectorSpins = selectorSpins;
+        this.readWriteSelectorsAssign = readWriteSelectorsAssign;
 
         filterChain = new GridNioFilterChain<>(log, lsnr, new HeadFilter(), filters);
 
@@ -840,21 +845,31 @@ public class GridNioServer<T> {
         int balanceIdx;
 
         if (workers > 1) {
-            if (req.accepted()) {
+            if (readWriteSelectorsAssign) {
+                if (req.accepted()) {
+                    balanceIdx = readBalanceIdx;
+
+                    readBalanceIdx += 2;
+
+                    if (readBalanceIdx >= workers)
+                        readBalanceIdx = 0;
+                }
+                else {
+                    balanceIdx = writeBalanceIdx;
+
+                    writeBalanceIdx += 2;
+
+                    if (writeBalanceIdx >= workers)
+                        writeBalanceIdx = 1;
+                }
+            }
+            else {
                 balanceIdx = readBalanceIdx;
 
-                readBalanceIdx += 2;
+                readBalanceIdx++;
 
                 if (readBalanceIdx >= workers)
                     readBalanceIdx = 0;
-            }
-            else {
-                balanceIdx = writeBalanceIdx;
-
-                writeBalanceIdx += 2;
-
-                if (writeBalanceIdx >= workers)
-                    writeBalanceIdx = 1;
             }
         }
         else
@@ -3149,6 +3164,9 @@ public class GridNioServer<T> {
         /** NIO sessions balancing flag. */
         private Balancer balancing;
 
+        /** */
+        private boolean readWriteSelectorsAssign;
+
         /**
          * Finishes building the instance.
          *
@@ -3178,6 +3196,7 @@ public class GridNioServer<T> {
                 skipRecoveryPred,
                 msgQueueLsnr,
                 balancing,
+                readWriteSelectorsAssign,
                 filters != null ? Arrays.copyOf(filters, filters.length) : EMPTY_FILTERS
             );
 
@@ -3188,6 +3207,16 @@ public class GridNioServer<T> {
                 ret.writeTimeout(writeTimeout);
 
             return ret;
+        }
+
+        /**
+         * @param readWriteSelectorsAssign TODO
+         * @return This for chaining.
+         */
+        public Builder<T> readWriteSelectorsAssign(boolean readWriteSelectorsAssign) {
+            this.readWriteSelectorsAssign = readWriteSelectorsAssign;
+
+            return this;
         }
 
         /**
@@ -3610,12 +3639,21 @@ public class GridNioServer<T> {
                 long maxBytes0 = -1, minBytes0 = -1;
                 int maxBytesIdx = -1, minBytesIdx = -1;
 
+//                if (log.isDebugEnabled())
+//                    log.debug("Start balance, workers: " + clientWorkers.size());
+
                 for (int i = 0; i < clientWorkers.size(); i++) {
                     GridNioServer.AbstractNioClientWorker worker = clientWorkers.get(i);
 
                     int sesCnt = worker.workerSessions.size();
 
                     long bytes0 = worker.bytesRcvd0 + worker.bytesSent0;
+
+//                    if (log.isDebugEnabled())
+//                        log.debug("Worker [id=" + i +
+//                            ", sesCnt=" + sesCnt +
+//                            ", rcvd=" + worker.bytesRcvd0 +
+//                            ", sent=" + worker.bytesSent0 + ']');
 
                     if ((maxBytes0 == -1 || bytes0 > maxBytes0) && bytes0 > 0 && sesCnt > 1) {
                         maxBytes0 = bytes0;

@@ -63,6 +63,7 @@ public class IgniteCommunicationBalanceTest extends GridCommonAbstractTest {
 
         commSpi.setSharedMemoryPort(-1);
         commSpi.setConnectionsPerNode(connectionsPerNode());
+        commSpi.setUsePairedConnections(false);
 
         if (selectors > 0)
             commSpi.setSelectorsCount(selectors);
@@ -95,9 +96,9 @@ public class IgniteCommunicationBalanceTest extends GridCommonAbstractTest {
         System.setProperty(IgniteSystemProperties.IGNITE_IO_BALANCE_PERIOD, "5000");
 
         try {
-            selectors = 4;
+            selectors = 2;
 
-            final int SRVS = 4;
+            final int SRVS = 6;
 
             startGridsMultiThreaded(SRVS);
 
@@ -105,7 +106,7 @@ public class IgniteCommunicationBalanceTest extends GridCommonAbstractTest {
 
             final Ignite client = startGrid(SRVS);
 
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < SRVS; i++) {
                 ClusterNode node = client.cluster().node(ignite(i).cluster().localNode().id());
 
                 client.compute(client.cluster().forNode(node)).call(new DummyCallable(null));
